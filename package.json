@@ -1,0 +1,27 @@
+{
+  "name": "ai-token-estimator",
+  "version": "1.0.0",
+  "description": "Dependency-free AI token counter and LLM API cost estimator for GPT, Claude, Gemini, Llama, Mistral and DeepSeek.",
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "license": "MIT",
+  "homepage": "https://www.nextreachstudio.in/tools/ai-token-calculator",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/RajeshShrirao/ai-token-estimator.git"
+  },
+  "keywords": [
+    "ai",
+    "llm",
+    "token-counter",
+    "token-estimator",
+    "gpt",
+    "claude",
+    "openai",
+    "anthropic",
+    "cost-estimator",
+    "typescript"
+  ],
+  "author": "NextReach Studio <hello@nextreachstudio.in> (https://www.nextreachstudio.in)"
+}
