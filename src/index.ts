@@ -5,31 +5,58 @@
  * character-count signals calibrated per model family, then prices the
  * result against public per-million-token rates.
  *
+ * Model lineup + prices verified 2026-10-07 against each provider's official
+ * pricing page (linked per model in `source`). Standard / non-cached /
+ * short-context rates. Rates change often — re-verify before billing decisions.
+ *
  * MIT License — Built by NextReach Studio (https://www.nextreachstudio.in)
  */
 
 export interface ModelProfile {
-  /** Stable id, e.g. "gpt-4o" */
+  /** Stable id, e.g. "gpt-6-1-sol" */
   id: string;
   /** Human label */
   label: string;
   /** Average characters per token for English prose/code mix */
   charsPerToken: number;
-  /** USD per 1M input tokens (0 = unknown) */
+  /** USD per 1M input tokens, standard tier (0 = unknown) */
   inputPerMTok: number;
-  /** USD per 1M output tokens (0 = unknown) */
+  /** USD per 1M output tokens, standard tier (0 = unknown) */
   outputPerMTok: number;
+  /** Official pricing page this rate was verified against */
+  source: string;
 }
 
+const OPENAI_PRICING = "https://developers.openai.com/api/docs/pricing";
+const ANTHROPIC_PRICING = "https://platform.claude.com/docs/en/models/overview";
+const GEMINI_PRICING = "https://ai.google.dev/gemini-api/docs/pricing";
+const DEEPSEEK_PRICING = "https://api-docs.deepseek.com/quick_start/pricing/";
+const MISTRAL_PRICING = "https://docs.mistral.ai/inference/pricing";
+
 export const MODELS: ModelProfile[] = [
-  { id: "gpt-4o", label: "GPT-4o", charsPerToken: 4.0, inputPerMTok: 2.5, outputPerMTok: 10 },
-  { id: "gpt-4o-mini", label: "GPT-4o mini", charsPerToken: 4.0, inputPerMTok: 0.15, outputPerMTok: 0.6 },
-  { id: "claude-35-sonnet", label: "Claude 3.5 Sonnet", charsPerToken: 3.8, inputPerMTok: 3, outputPerMTok: 15 },
-  { id: "claude-35-haiku", label: "Claude 3.5 Haiku", charsPerToken: 3.8, inputPerMTok: 0.8, outputPerMTok: 4 },
-  { id: "gemini-15-pro", label: "Gemini 1.5 Pro", charsPerToken: 4.0, inputPerMTok: 1.25, outputPerMTok: 5 },
-  { id: "llama-31-70b", label: "Llama 3.1 70B", charsPerToken: 3.6, inputPerMTok: 0.35, outputPerMTok: 0.4 },
-  { id: "mistral-large", label: "Mistral Large", charsPerToken: 3.7, inputPerMTok: 2, outputPerMTok: 6 },
-  { id: "deepseek-v3", label: "DeepSeek V3", charsPerToken: 3.2, inputPerMTok: 0.27, outputPerMTok: 1.1 },
+  // --- OpenAI: GPT-6 generation + GPT-5.6 (official pricing) ---
+  { id: "gpt-6-astra", label: "GPT-6 Astra (flagship)", charsPerToken: 4.0, inputPerMTok: 10, outputPerMTok: 50, source: OPENAI_PRICING },
+  { id: "gpt-6-1-sol", label: "GPT-6.1 Sol", charsPerToken: 4.0, inputPerMTok: 2, outputPerMTok: 10, source: OPENAI_PRICING },
+  { id: "gpt-6-luna", label: "GPT-6 Luna (cheapest)", charsPerToken: 4.0, inputPerMTok: 0.1, outputPerMTok: 0.5, source: OPENAI_PRICING },
+  { id: "gpt-5-6-sol", label: "GPT-5.6 Sol", charsPerToken: 4.0, inputPerMTok: 4, outputPerMTok: 20, source: OPENAI_PRICING },
+  // --- Anthropic: Claude 5 generation (official docs) ---
+  { id: "claude-fable-5-1", label: "Claude Fable 5.1 (reasoning)", charsPerToken: 3.8, inputPerMTok: 10, outputPerMTok: 50, source: ANTHROPIC_PRICING },
+  { id: "claude-opus-5-5", label: "Claude Opus 5.5", charsPerToken: 3.8, inputPerMTok: 4, outputPerMTok: 20, source: ANTHROPIC_PRICING },
+  { id: "claude-sonnet-5-5", label: "Claude Sonnet 5.5", charsPerToken: 3.8, inputPerMTok: 2, outputPerMTok: 10, source: ANTHROPIC_PRICING },
+  { id: "claude-haiku-4-5", label: "Claude Haiku 4.5 (fastest)", charsPerToken: 3.8, inputPerMTok: 1, outputPerMTok: 5, source: ANTHROPIC_PRICING },
+  // --- Google: Gemini 3 generation, standard tier ≤200k tokens (official docs) ---
+  { id: "gemini-3-pro", label: "Gemini 3 Pro", charsPerToken: 4.0, inputPerMTok: 2, outputPerMTok: 12, source: GEMINI_PRICING },
+  { id: "gemini-3-flash", label: "Gemini 3 Flash", charsPerToken: 4.0, inputPerMTok: 0.5, outputPerMTok: 3, source: GEMINI_PRICING },
+  { id: "gemini-3-5-flash-lite", label: "Gemini 3.5 Flash-Lite", charsPerToken: 4.0, inputPerMTok: 0.3, outputPerMTok: 2.5, source: GEMINI_PRICING },
+  // --- DeepSeek: V4 generation, peak cache-miss rates (official docs; off-peak is half) ---
+  { id: "deepseek-v4-pro", label: "DeepSeek V4 Pro", charsPerToken: 3.2, inputPerMTok: 1.32, outputPerMTok: 3.96, source: DEEPSEEK_PRICING },
+  { id: "deepseek-flash", label: "DeepSeek V4.1 Flash", charsPerToken: 3.2, inputPerMTok: 0.3, outputPerMTok: 1.2, source: DEEPSEEK_PRICING },
+  // --- Meta Llama 4 via hosted inference (Together AI / Fireworks prevailing rates) ---
+  { id: "llama-4-maverick", label: "Llama 4 Maverick (hosted)", charsPerToken: 3.6, inputPerMTok: 0.15, outputPerMTok: 0.6, source: "https://www.together.ai/pricing" },
+  // --- Mistral (official docs) ---
+  { id: "mistral-large-3", label: "Mistral Large 3", charsPerToken: 3.7, inputPerMTok: 0.5, outputPerMTok: 1.5, source: MISTRAL_PRICING },
+  { id: "mistral-medium-3-5", label: "Mistral Medium 3.5", charsPerToken: 3.7, inputPerMTok: 1.5, outputPerMTok: 7.5, source: MISTRAL_PRICING },
+  { id: "mistral-small-4", label: "Mistral Small 4", charsPerToken: 3.7, inputPerMTok: 0.15, outputPerMTok: 0.6, source: MISTRAL_PRICING },
 ];
 
 export interface Estimate {
@@ -43,10 +70,10 @@ export interface Estimate {
 }
 
 /**
- * Estimate tokens for `text` on `modelId` (defaults to gpt-4o).
+ * Estimate tokens for `text` on `modelId` (defaults to gpt-6-1-sol).
  * Returns 0 tokens for empty/whitespace input.
  */
-export function estimateTokens(text: string, modelId = "gpt-4o", outputTokens = 0): Estimate {
+export function estimateTokens(text: string, modelId = "gpt-6-1-sol", outputTokens = 0): Estimate {
   const model = MODELS.find((m) => m.id === modelId) ?? MODELS[0];
   const characters = text.length;
   const words = text.trim() ? text.trim().split(/\s+/).length : 0;
